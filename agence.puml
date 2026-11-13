@@ -1,0 +1,130 @@
+@startuml
+title Agence de voyage - Diagramme de classes
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+enum StatutReservation {
+  EN_ATTENTE
+  VALIDEE
+  ANNULEE
+}
+enum StatutPaiement {
+  EFFECTUE
+  ANNULE
+}
+enum StatutRemboursement {
+  AUCUN
+  A_REMBOURSER
+  REMBOURSE
+}
+enum ModePaiement {
+  ESPECES
+  MOBILE_MONEY
+  CARTE
+  VIREMENT
+}
+
+class Agence {
+  - nom : string
+  - ville : string
+  - passagers : vector<Passager>
+  - vols : vector<Vol>
+  - reservations : vector<Reservation>
+  - paiements : vector<Paiement>
+  + enregistrerPassager() : void
+  + ajouterVol() : void
+  + afficherVolsDisponibles() : void
+  + rechercherVol() : Vol*
+  + effectuerReservation() : void
+  + enregistrerPaiement() : void
+  + annulerPaiement() : void
+  + annulerReservation() : void
+  + consulterReservations() : void
+  + afficherInfosReservation() : void
+  + afficherMenu() : void
+  + executer() : void
+}
+
+class Passager {
+  - idPassager : int
+  - nom : string
+  - prenom : string
+  - telephone : string
+  - email : string
+  - numeroPiece : string
+  + Passager(id, nom, prenom, tel, email, piece)
+  + getIdPassager() : int
+  + afficher() : void
+}
+
+class Vol {
+  - numeroVol : string
+  - villeDepart : string
+  - villeArrivee : string
+  - dateDepart : string
+  - heureDepart : string
+  - capacite : int
+  - placesReservees : int
+  - prix : double
+  + Vol(num, dep, arr, date, heure, cap, prix)
+  + getters() / setters()
+  + getPlacesDisponibles() : int
+  + estDisponible() : bool
+  + reserverPlace() : void
+  + libererPlace() : void
+  + afficher() : void
+}
+
+class Reservation {
+  - idReservation : int
+  - dateReservation : string
+  - numeroPlace : int
+  - statut : StatutReservation
+  + Reservation(id, passager*, vol*, place)
+  + getters() / setters()
+  + valider() : void
+  + annuler() : void
+  + estValidee() : bool
+  + estAnnulee() : bool
+  + peutEtrePayee() : bool
+  + lierPaiement(p : Paiement*) : void
+  + afficher() : void
+}
+
+class Paiement {
+  - idPaiement : int
+  - montant : double
+  - datePaiement : string
+  - mode : ModePaiement
+  - statut : StatutPaiement
+  - statutRemboursement : StatutRemboursement
+  + Paiement(id, reservation*, montant, mode)
+  + getters() / setters()
+  + enregistrer() : void
+  + annuler() : void
+  + traiterRemboursement() : void
+  + afficher() : void
+}
+
+Agence "1" *-- "0..*" Passager : gère >
+Agence "1" *-- "0..*" Vol : gère >
+Agence "1" *-- "0..*" Reservation : gère >
+Agence "1" *-- "0..*" Paiement : gère >
+
+Passager "1" -- "0..*" Reservation : effectue >
+Vol "1" -- "0..*" Reservation : porte sur <
+Reservation "1" -- "0..1" Paiement : est réglée par >
+
+Reservation ..> StatutReservation
+Paiement ..> StatutPaiement
+Paiement ..> StatutRemboursement
+Paiement ..> ModePaiement
+
+note bottom of Reservation
+  {unique (passager, vol)}
+  {reservation annulee => pas de Paiement}
+end note
+note bottom of Vol
+  {placesReservees <= capacite}
+end note
+@enduml
